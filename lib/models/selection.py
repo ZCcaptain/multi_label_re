@@ -11,7 +11,7 @@ import math
 from typing import Dict, List, Tuple, Set, Optional
 from functools import partial
 from torch.nn.utils.rnn import pad_sequence
-from lib.models.CRF import CRF
+# from lib.models.CRF import CRF
 from pytorch_transformers import *
 import numpy as np 
 

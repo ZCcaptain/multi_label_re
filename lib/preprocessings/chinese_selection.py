@@ -45,7 +45,7 @@ class Chinese_selection_preprocessing(object):
             if relation not in relation_vocab:
                 relation_vocab[relation] = i
                 i += 1
-        relation_vocab['N'] = i
+        #relation_vocab['N'] = i
         json.dump(relation_vocab,
                   open(self.relation_vocab_path, 'w'),
                   ensure_ascii=False)

@@ -22,24 +22,19 @@ from lib.config import Hyper
 import numpy as np
 
 
-# parser = argparse.ArgumentParser()
-# parser.add_argument('--exp_name',
-#                     '-e',
-#                     type=str,
-#                     default='conll_bert_re',
-#                     help='experiments/exp_name.json')
-# parser.add_argument('--mode',
-#                     '-m',
-#                     type=str,
-#                     default='preprocessing',
-#                     help='preprocessing|train|evaluation')
-# args = parser.parse_args()
+parser = argparse.ArgumentParser()
+parser.add_argument('--exp_name',
+                    '-e',
+                    type=str,
+                    default='DuIE_selection_re',
+                    help='experiments/exp_name.json')
+parser.add_argument('--mode',
+                    '-m',
+                    type=str,
+                    default='train',
+                    help='preprocessing|train|evaluation')
+args = parser.parse_args()
 
-class Args(object):
-    def __init__(self, exp_name, mode):
-        self.exp_name = exp_name
-        self.mode = mode
-args = Args('DuIE_selection_re', 'evaluation')
 
 
 class Runner(object):
@@ -72,7 +67,7 @@ class Runner(object):
         self.criterion = nn.BCEWithLogitsLoss()
 
     def preprocessing(self):
-        if self.exp_name == 'conll_selection_re':
+        if self.exp_name == 'DuIE_selection_re':
             self.preprocessor = Chinese_selection_preprocessing(self.hyper)
         self.preprocessor.gen_relation_vocab()
         self.preprocessor.gen_all_data()
