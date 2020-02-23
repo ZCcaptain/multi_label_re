@@ -53,7 +53,7 @@ class MultiHeadSelection(nn.Module):
                                    bidirectional=True,
                                    batch_first=True)
         self.max_pool = nn.MaxPool2d(kernel_size=2, stride=(2, 1), padding=(0, 1))
-        self.classifier = nn.Linear(100, len(self.relation_vocab))
+        self.fc = nn.Linear(100, len(self.relation_vocab))
         self.dropout_c = nn.Dropout(0.5)
 
 
@@ -78,7 +78,7 @@ class MultiHeadSelection(nn.Module):
                                                    self.hyper.hidden_size,
                                                    dim=2))
             feature = torch.max(o, 2)[0]
-            output = self.classifier(feature)
+            output = self.fc(feature)
             output = self.dropout_c(output)
 
         return output
