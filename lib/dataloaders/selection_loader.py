@@ -78,16 +78,16 @@ class Selection_Dataset(Dataset):
         # TODO: tokenizer
         oov = self.word_vocab['oov']
         padded_list = list(map(lambda x: self.word_vocab.get(x, oov), text))
-        padded_list.extend([self.word_vocab['<pad>']] *
-                           (self.hyper.max_text_len - len(text)))
+        # padded_list.extend([self.word_vocab['<pad>']] *
+        #                    (self.hyper.max_text_len - len(text)))
         return torch.tensor(padded_list)
 
     def bio2tensor(self, bio):
         # here we pad bio with "O". Then, in our model, we will mask this "O" padding.
         # in multi-head selection, we will use "<pad>" token embedding instead.
         padded_list = list(map(lambda x: self.bio_vocab[x], bio))
-        padded_list.extend([self.bio_vocab['O']] *
-                           (self.hyper.max_text_len - len(bio)))
+        # padded_list.extend([self.bio_vocab['O']] *
+        #                    (self.hyper.max_text_len - len(bio)))
         return torch.tensor(padded_list)
 
     def selection2tensor(self, text, selection):
@@ -105,11 +105,11 @@ class Selection_Dataset(Dataset):
 
 class Batch_reader(object):
     def __init__(self, data):
-        # data.sort(key=lambda x: len(x[0]), reverse=True)
+        data.sort(key=lambda x: len(x[0]), reverse=True)
         transposed_data = list(zip(*data))
         # tokens_id, bio_id, selection_id, spo, text, bio
 
-        self.tokens_id = pad_sequence(transposed_data[0], batch_first=True)
+        self.tokens_id = transposed_data[0]
         self.bio_id = transposed_data[1]
         self.selection_id = torch.stack(transposed_data[2], 0)
 

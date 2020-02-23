@@ -53,17 +53,18 @@ class MultiHeadSelection(nn.Module):
                                    bidirectional=True,
                                    batch_first=True)
         self.max_pool = nn.MaxPool2d(kernel_size=2, stride=(2, 1), padding=(0, 1))
-        self.fc = nn.Linear(100, len(self.relation_vocab))
+        self.fc = nn.Linear(self.hyper.hidden_size, len(self.relation_vocab))
         self.dropout_c = nn.Dropout(0.5)
 
 
 
     def forward(self, sample, is_train: bool) -> Dict[str, torch.Tensor]:
 
-        # tokens_len = torch.tensor(list(sample.length))
-        # tokens = pad_sequence(sample.tokens_id, batch_first=True, padding_value=self.word_vocab['<pad>']).to(self.gpu)
-        tokens = sample.tokens_id.cuda(self.gpu)
-
+        tokens_len = torch.tensor(list(sample.length))
+        tokens = pad_sequence(sample.tokens_id, batch_first=True, padding_value=self.word_vocab['<pad>']).to(self.gpu)
+        # tokens = sample.tokens_id.cuda(self.gpu) 
+        mask = tokens == self.word_vocab['<pad>']
+        mask = mask.bool()
 
         # if self.hyper.cell_name in ('gru', 'lstm'):
         #     mask = tokens != self.word_vocab['<pad>']  # batch x seq
@@ -71,13 +72,16 @@ class MultiHeadSelection(nn.Module):
         if self.hyper.cell_name in ('lstm', 'gru'):
             embedded = self.word_embeddings(tokens)
             embedded = self.input_dropout(embedded)
-            # embedded = nn.utils.rnn.pack_padded_sequence(embedded, tokens_len, batch_first=True)
+            embedded = nn.utils.rnn.pack_padded_sequence(embedded, tokens_len, batch_first=True)
             o, h = self.encoder(embedded)
-            # o, _ = nn.utils.rnn.pad_packed_sequence(o, batch_first=True)
+            o, _ = nn.utils.rnn.pad_packed_sequence(o, batch_first=True)
             o = (lambda a: sum(a) / 2)(torch.split(o,
                                                    self.hyper.hidden_size,
                                                    dim=2))
-            feature = torch.max(o, 2)[0]
+            B, L = mask.size()
+            mask = mask.unsqueeze(2).expand(B, L, self.hyper.hidden_size)
+            o.data.masked_fill_(mask, -float('inf'))
+            feature = torch.max(o, 1)[0]
             output = self.fc(feature)
             output = self.dropout_c(output)
 
